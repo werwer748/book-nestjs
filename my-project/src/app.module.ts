@@ -1,24 +1,20 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import emailConfig from 'src/config/emailConfig';
 import { validationSchema } from './config/validationSchema';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
-import { Logger2Middleware } from 'src/common/middlewares/logger2.middleware';
-import { UsersController } from 'src/users/users.controller';
+import authConfig from 'src/config/authConfig';
+import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
 
 console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
 @Module({
   imports: [
+    // LoggerModule, => 로거를 직접 구현한 경우
     ConfigModule.forRoot({
       envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
-      load: [emailConfig],
+      load: [emailConfig, authConfig],
       isGlobal: true,
       validationSchema,
     }), // .env
@@ -50,11 +46,15 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
       } & Partial<DataSourceOptions>;
       */
     }),
-    UsersModule, // UsersModule에 UsersService, EmailService가 등록되어있어서 UsersModule만 import하면 됨
+    UsersModule,
+    // UsersModule에 UsersService, EmailService, AuthService가 등록되어있어서 UsersModule만 import하면 됨
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
+export class AppModule {}
+
+/** middleware로 로그를 출력
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
@@ -62,7 +62,7 @@ export class AppModule implements NestModule {
       // users 경로의 GET 요청은 미들웨어를 적용하지 않는다.
       // .exclude({ path: '/users', method: RequestMethod.GET })
       .forRoutes(UsersController);
-    /* 
+    
     apply 메서드 원형
     apply(...middleware: (Type<any> | Function)[]): MiddlewareConfigProxy
 
@@ -70,6 +70,7 @@ export class AppModule implements NestModule {
     import { Type } from '../type.interface';
     import { RouteInfo } from './middleware-configuration.interface';
     import { MiddlewareConsumer } from './middleware-consumer.interface';
+    import { AuthModule } from './auth/auth.module';
     
     export interface MiddlewareConfigProxy {    
       exclude(...routes: (string | RouteInfo)[]): MiddlewareConfigProxy;    
@@ -77,6 +78,43 @@ export class AppModule implements NestModule {
     }
     - forRoutes의 인수로 문자열 형식의 경로를 직접 주거나, 컨트롤러 클래스 이름을 주어도 되고,
       RouteInfo 객체를 넘길 수도 있다. 보통은 컨트롤러 클래스를 주어 동작하도록 한다.
-    */
   }
 }
+
+*/
+
+/**
+ * winston 로그레벨 일곱 단계
+ * error: 0
+ * warn: 1
+ * info: 2
+ * http: 3
+ * verbose: 4
+ * debug: 5
+ * silly: 6
+ */
+/*
+윈스턴 로거 기본 사용 법
+    WinstonModule.forRoot({
+      transports: [
+        transports 옵션을 설정
+        new winston.transports.Console({
+          로그 레벨을 개발환경에 따라 다르게 지정
+          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+          
+          format: winston.format.combine(
+            
+            로그를 남긴 시각을 함께 표시하도록 한다.
+            winston.format.timestamp(),
+
+            어디에서 로그를 남겼는지를 구분하는 appName('MyApp')
+            로그를 읽기 쉽도록 하는 옵션인 prettyPrint 옵션을 설정
+            nestWinstonModuleUtilities.format.nestLike('MyApp', {
+              prettyPrint: true,
+              colors: true,
+            }),
+          ),
+        }),
+      ],
+    }),
+*/
