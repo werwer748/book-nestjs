@@ -32,6 +32,11 @@ export class UsersController {
   async getUserInfo(@Param('id') userId: string): Promise<IUserInfo> {
     return await this.usersService.getUserInfo(userId);
   }
+
+  // @Get(':id')
+  // findOne(@Param('id', ValidationPipe) id: number) {
+  //   return this.usersService.findOne(id);
+  // }
 }
 
 //* req 값의 dto는 class, 반환 값 데이터 타입은 interface로 만듬

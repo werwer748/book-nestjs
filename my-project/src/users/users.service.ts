@@ -62,4 +62,9 @@ export class UsersService {
 
     throw new Error('아직 구현 전입니다...');
   }
+
+  // 테스트용 서비스 메서드
+  findOne(id) {
+    return `Success ${id}`;
+  }
 }
