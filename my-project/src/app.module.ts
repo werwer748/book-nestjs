@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import emailConfig from 'src/config/emailConfig';
@@ -7,6 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import authConfig from 'src/config/authConfig';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
+import { ExceptionModule } from 'src/common/filter/http-exception.module';
 
 console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
 @Module({
@@ -46,11 +49,19 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
       } & Partial<DataSourceOptions>;
       */
     }),
-    UsersModule,
+    ExceptionModule, // 모듈화하여 등록
     // UsersModule에 UsersService, EmailService, AuthService가 등록되어있어서 UsersModule만 import하면 됨
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    // Logger, - 모듈로 등록하기 전..
+    // {
+    //   provide: APP_FILTER, // 의존성 주입을 위해 커스텀프로바이더로 등록
+    //   useClass: HttpExceptionFilter,
+    // },
+    AppService,
+  ],
 })
 export class AppModule {}
 

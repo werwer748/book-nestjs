@@ -6,6 +6,7 @@ import {
   utilities as nestWinstonModuleUtilities,
 } from 'nest-winston';
 import * as winston from 'winston';
+import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -29,6 +30,9 @@ async function bootstrap() {
       transform: true, // class-transformer 를 적용하기 위한 설정
     }),
   );
+  //
+  // 예외필터를 전역으로 적용 - 의존성 주입에 제약이 있다. 의존성을 주입받고자 한다면 커스텀 프로바이더로 등록한다.
+  // app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(3000);
 }
 bootstrap();
