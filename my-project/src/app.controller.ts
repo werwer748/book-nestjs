@@ -1,6 +1,10 @@
-import { Controller, Get, UseFilters } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Param,
+} from '@nestjs/common';
 import { AppService } from 'src/app.service';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 
 // @UseFilters(HttpExceptionFilter) // 예외필터를 특정 컨트롤러 전체에 적용할 때
 @Controller()
@@ -20,5 +24,11 @@ export class AppController {
     요청시 500 서버 에러가 발생.
     Nest의 내장된 예외 필터들을 살펴보면 결국 모두 Error 객체로부터 파생된 것들이다.
     */
+  }
+
+  // @UseInterceptors(ErrorsInterceptor) // 인터셉터로 에러 핸들링해보기
+  @Get(':id')
+  interceptor(@Param('id') id: string) {
+    throw new InternalServerErrorException();
   }
 }

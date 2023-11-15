@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import emailConfig from 'src/config/emailConfig';
@@ -7,9 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import authConfig from 'src/config/authConfig';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { ExceptionModule } from 'src/common/filter/http-exception.module';
+import { LoggingModule } from 'src/common/interceptor/logging.module';
 
 console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
 @Module({
@@ -50,6 +49,7 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
       */
     }),
     ExceptionModule, // 모듈화하여 등록
+    LoggingModule, // ExceptionModule과 마찬가지로 의존성 주입을 위해 모듈화하여 등록
     // UsersModule에 UsersService, EmailService, AuthService가 등록되어있어서 UsersModule만 import하면 됨
     UsersModule,
   ],
