@@ -9,6 +9,7 @@ import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
 import { ExceptionModule } from 'src/common/filter/http-exception.module';
 import { LoggingModule } from 'src/common/interceptor/logging.module';
+import { BatchModule } from 'src/common/batch/batch.module';
 
 console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
 @Module({
@@ -50,6 +51,7 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
     }),
     ExceptionModule, // 모듈화하여 등록
     LoggingModule, // ExceptionModule과 마찬가지로 의존성 주입을 위해 모듈화하여 등록
+    BatchModule,
     // UsersModule에 UsersService, EmailService, AuthService가 등록되어있어서 UsersModule만 import하면 됨
     UsersModule,
   ],
