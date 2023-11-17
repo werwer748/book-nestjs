@@ -18,6 +18,9 @@ import { IUserInfo } from 'src/users/interface/user-info.interface';
 import { UsersService } from './users.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from 'src/users/command/create-user.command';
+import { GetUserInfoQuery } from 'src/users/query/get-user-info.query';
 
 @Controller('users')
 export class UsersController {
@@ -31,13 +34,22 @@ export class UsersController {
 
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
     // this.printLoggerServiceLog(dto);
     const { name, email, password } = dto;
 
-    await this.usersService.createUser(name, email, password);
+    const command = new CreateUserCommand(name, email, password);
+
+    // 기존 서비스 방식
+    // await this.usersService.createUser(name, email, password);
+
+    // command 방식
+    await this.commandBus.execute(command);
   }
 
   @Post('/email-verify')
@@ -69,8 +81,13 @@ export class UsersController {
     // verify 메서드에서 JWT가 서버에서 발급한 것인지 검증
     // this.authService.verify(jwtString);
 
-    // 유저 정보를 가져와 응답으로 돌려준다.
-    return this.usersService.getUserInfo(userId);
+    // 유저 정보를 가져와 응답으로 돌려준다. - 서비스를 이용한 방식
+    // return this.usersService.getUserInfo(userId);
+
+    //cqrs query방식
+    const getUserInfoQuery = new GetUserInfoQuery(userId);
+
+    return this.queryBus.execute(getUserInfoQuery);
   }
 
   // private printWinstonLog(dto) { // nest-winston 적용방식
