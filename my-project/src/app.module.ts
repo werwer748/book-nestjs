@@ -10,6 +10,9 @@ import { AppService } from 'src/app.service';
 import { ExceptionModule } from 'src/common/filter/http-exception.module';
 import { LoggingModule } from 'src/common/interceptor/logging.module';
 import { BatchModule } from 'src/common/batch/batch.module';
+import { HealthCheckController } from 'src/health-check/health-check.controller';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
 @Module({
@@ -51,11 +54,12 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
     }),
     ExceptionModule, // 모듈화하여 등록
     LoggingModule, // ExceptionModule과 마찬가지로 의존성 주입을 위해 모듈화하여 등록
-    BatchModule,
+    BatchModule, // batch 작업을 위한 모듈
+    TerminusModule, // health-check 모듈
+    HttpModule, // axios를 사용하기 위한 모듈
     // UsersModule에 UsersService, EmailService, AuthService가 등록되어있어서 UsersModule만 import하면 됨
     UsersModule,
   ],
-  controllers: [AppController],
   providers: [
     // Logger, - 모듈로 등록하기 전..
     // {
@@ -64,6 +68,7 @@ console.log(`${__dirname}/config/env/.${process.env.NODE_ENV}.env`);
     // },
     AppService,
   ],
+  controllers: [HealthCheckController, AppController],
 })
 export class AppModule {}
 
@@ -80,10 +85,6 @@ export class AppModule implements NestModule {
     apply(...middleware: (Type<any> | Function)[]): MiddlewareConfigProxy
 
     forRoutes 메서드 원형
-    import { Type } from '../type.interface';
-    import { RouteInfo } from './middleware-configuration.interface';
-    import { MiddlewareConsumer } from './middleware-consumer.interface';
-    import { AuthModule } from './auth/auth.module';
     
     export interface MiddlewareConfigProxy {    
       exclude(...routes: (string | RouteInfo)[]): MiddlewareConfigProxy;    
